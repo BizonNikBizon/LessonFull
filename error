@@ -1,15 +1,14 @@
-Error: Incorrect attribute value type
+ Error: creating EC2 Instance: InvalidGroup.NotFound: The security group 'sg-088cc02b3d090c213' does not exist in VPC 'vpc-044eb96ffbeb1bf05'
+│ 	status code: 400, request id: 17377749-8fd5-48bb-bde0-9f3df53b7c34
 │ 
-│   on test.tf line 86, in resource "aws_globalaccelerator_endpoint_group" "vpc1_group":
-│   86:     endpoint_id = [aws_instance.web_instance_vpc1_public.private_ip]
+│   with aws_instance.web_instance_vpc2_public,
+│   on test.tf line 55, in resource "aws_instance" "web_instance_vpc2_public":
+│   55: resource "aws_instance" "web_instance_vpc2_public" {
 │ 
-│ Inappropriate value for attribute "endpoint_id": string required.
 ╵
 ╷
-│ Error: Incorrect attribute value type
+│ Error: creating Global Accelerator Endpoint Group: InvalidArgumentException: Unsupported endpoint: 10.0.1.7
 │ 
-│   on test.tf line 95, in resource "aws_globalaccelerator_endpoint_group" "vpc2_group":
-│   95:     endpoint_id = [aws_instance.web_instance_vpc2_public.private_ip]
-│ 
-│ Inappropriate value for attribute "endpoint_id": string required.
-╵
+│   with aws_globalaccelerator_endpoint_group.vpc1_group,
+│   on test.tf line 82, in resource "aws_globalaccelerator_endpoint_group" "vpc1_group":
+│   82: resource "aws_globalaccelerator_endpoint_group" "vpc1_group" {
