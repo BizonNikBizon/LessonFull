@@ -1,228 +1,65 @@
-# Провайдер для региона eu-central-1
 provider "aws" {
   region = "eu-central-1"
+  alias  = "vpc1"
 }
 
-# Создание VPC и подсетей для региона eu-central-1
-resource "aws_vpc" "vpc1" {
-  cidr_block = "10.0.0.0/16"
-
-  tags = {
-    Name  = "VPC1"
-    Owner = "Bizon Nik"
-  }
-}
-
-resource "aws_subnet" "public_subnet_vpc1" {
-  vpc_id            = aws_vpc.vpc1.id
-  cidr_block        = "10.0.1.0/24"
-  availability_zone = "eu-central-1a"
-
-  tags = {
-    Name  = "Public Subnet VPC1"
-    Owner = "Bizon Nik"
-  }
-}
-
-# Создание Security Group для VPC1
-resource "aws_security_group" "lb_sg_vpc1" {
-  name_prefix = "lb_sg_vpc1_"
-  vpc_id      = aws_vpc.vpc1.id
-
-  # Разрешаем HTTP и SSH доступы
-  ingress {
-    description = "HTTP"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "SSH"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Разрешаем все исходящие соединения
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name  = "LB Security Group VPC1"
-    Owner = "Bizon Nik"
-  }
-}
-
-# Провайдер для региона us-east-1 с алиасом "useast"
 provider "aws" {
-  alias  = "useast"
   region = "us-east-1"
+  alias  = "vpc2"
 }
 
-# Создание VPC и подсетей для региона us-east-1
-resource "aws_vpc" "vpc2" {
-  cidr_block = "10.1.0.0/16"
-
-  tags = {
-    Name  = "VPC2"
-    Owner = "Bizon Nik"
-  }
+data "aws_vpc" "vpc1" {
+  provider = aws.vpc1
+  default  = true
 }
 
-resource "aws_subnet" "public_subnet_vpc2" {
-  vpc_id            = aws_vpc.vpc2.id
-  cidr_block        = "10.1.1.0/24"
-  availability_zone = "us-east-1a"
-
-  tags = {
-    Name  = "Public Subnet VPC2"
-    Owner = "Bizon Nik"
-  }
+data "aws_subnet_ids" "public_subnets_vpc1" {
+  provider = aws.vpc1
+  vpc_id   = data.aws_vpc.vpc1.id
 }
 
-# Создание Security Group для VPC2
+data "aws_vpc" "vpc2" {
+  provider = aws.vpc2
+  default  = true
+}
+
+data "aws_subnet_ids" "public_subnets_vpc2" {
+  provider = aws.vpc2
+  vpc_id   = data.aws_vpc.vpc2.id
+}
+
+resource "aws_security_group" "lb_sg_vpc1" {
+  name_prefix = "lb_sg_vpc1-"
+  vpc_id      = data.aws_vpc.vpc1.id
+}
+
 resource "aws_security_group" "lb_sg_vpc2" {
-  name_prefix = "lb_sg_vpc2_"
-  vpc_id      = aws_vpc.vpc2.id
-
-  # Разрешаем HTTP и SSH доступы
-  ingress {
-    description = "HTTP"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "SSH"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Разрешаем все исходящие соединения
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name  = "LB Security Group VPC2"
-    Owner = "Bizon Nik"
-  }
-}
-
-# Файл user_data.sh для экземпляров в VPC1
-data "template_file" "user_data_vpc1" {
-  template = <<-EOT
-#!/bin/bash
-# Получение приватного IP-адреса текущего экземпляра
-PRIVATE_IP=\$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
-sudo yum update -y
-sudo yum install -y httpd
-sudo systemctl enable httpd
-sudo systemctl start httpd
-cat > /var/www/html/index.html <<EOF
-<!DOCTYPE html>
-<html>
-<head>
-  <title>My Simple Website - VPC1</title>
-</head>
-<body style="background-color: lightblue;">
-  <h1 style="color: red;">Привет Дядя Дима! Но Dithih звучит! Это работает! (VPC1 - Instance \${HOSTNAME} - Private IP: \${PRIVATE_IP})</h1>
-  <img src="https://img2.akspic.ru/crops/1/0/0/8/6/168001/168001-more-voda-gidroresursy-oblako-prirodnyj_landshaft-3840x2160.jpg" alt="BMW 525tds">
-</body>
-</html>
-EOF
-
-  vars = {
-    hostname    = "WebInstanceVPC1"
-    private_ip  = "\${aws_instance.web_instance_vpc1_public.private_ip}"
-  }
+  name_prefix = "lb_sg_vpc2-"
+  vpc_id      = data.aws_vpc.vpc2.id
 }
 
 resource "aws_instance" "web_instance_vpc1_public" {
-  provider                = aws.useast
+  provider                = aws.vpc1
   ami                     = "ami-0e00e602389e469a3"  # Используем ami-0e00e602389e469a3 для региона eu-central-1
   instance_type           = "t2.micro"
-  subnet_id               = aws_subnet.public_subnet_vpc1.id
+  subnet_id               = data.aws_subnet_ids.public_subnets_vpc1.ids[0]
   vpc_security_group_ids  = [aws_security_group.lb_sg_vpc1.id]
-  user_data               = data.template_file.user_data_vpc1.rendered
+
   tags = {
     Name  = "WebInstanceVPC1"
     Owner = "Bizon Nik"
   }
 }
 
-# Файл user_data.sh для экземпляров в VPC2
-data "template_file" "user_data_vpc2" {
-  template = <<-EOT
-#!/bin/bash
-# Получение приватного IP-адреса текущего экземпляра
-PRIVATE_IP=\$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
-sudo yum update -y
-sudo yum install -y httpd
-sudo systemctl enable httpd
-sudo systemctl start httpd
-cat > /var/www/html/index.html <<EOF
-<!DOCTYPE html>
-<html>
-<head>
-  <title>My Simple Website - VPC2</title>
-</head>
-<body style="background-color: lightblue;">
-  <h1 style="color: blue;">Hello from VPC2! (VPC2 - Instance \${HOSTNAME} - Private IP: \${PRIVATE_IP})</h1>
-  <img src="https://img2.akspic.ru/crops/1/0/0/8/6/168001/168001-more-voda-gidroresursy-oblako-prirodnyj_landshaft-3840x2160.jpg" alt="BMW 525tds">
-</body>
-</html>
-EOF
-
-  vars = {
-    hostname    = "WebInstanceVPC2"
-    private_ip  = "\${aws_instance.web_instance_vpc2_public.private_ip}"
-  }
-}
-
 resource "aws_instance" "web_instance_vpc2_public" {
-  provider                = aws.useast
+  provider                = aws.vpc2
   ami                     = "ami-0f34c5ea932e6f0e4"  # Используем ami-0f34c5ea932e6f0e4 для региона us-east-1
   instance_type           = "t2.micro"
-  subnet_id               = aws_subnet.public_subnet_vpc2.id
+  subnet_id               = data.aws_subnet_ids.public_subnets_vpc2.ids[0]
   vpc_security_group_ids  = [aws_security_group.lb_sg_vpc2.id]
-  user_data               = data.template_file.user_data_vpc2.rendered
+
   tags = {
     Name  = "WebInstanceVPC2"
     Owner = "Bizon Nik"
   }
 }
-
-#!/bin/bash
-# Получение приватного IP-адреса текущего экземпляра
-PRIVATE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
-sudo yum update -y
-sudo yum install -y httpd
-sudo systemctl enable httpd
-sudo systemctl start httpd
-cat > /var/www/html/index.html <<EOF
-<!DOCTYPE html>
-<html>
-<head>
-  <title>My Simple Website</title>
-</head>
-<body style="background-color: lightblue;">
-  <h1 style="color: red;">Привет Дядя Дима! Но Dithih звучит! Это работает! (Instance \$hostname - Private IP: \$private_ip)</h1>
-  <img src="https://img2.akspic.ru/crops/1/0/0/8/6/168001/168001-more-voda-gidroresursy-oblako-prirodnyj_landshaft-3840x2160.jpg" alt="BMW 525tds">
-</body>
-</html>
-EOF
