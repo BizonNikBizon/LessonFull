@@ -83,7 +83,7 @@ resource "aws_globalaccelerator_endpoint_group" "vpc1_group" {
   listener_arn          = aws_globalaccelerator_listener.example.id
   endpoint_group_region = "us-east-1"
   endpoint_configuration {
-    endpoint_id = [aws_instance.web_instance_vpc1_public.private_ip] # Здесь добавлена обертка [ ] для преобразования в список строк
+    endpoint_id = aws_instance.web_instance_vpc1_public.*.private_ip # Используем *. для передачи списка всех приватных IP
     weight       = 50
   }
 }
@@ -92,10 +92,11 @@ resource "aws_globalaccelerator_endpoint_group" "vpc2_group" {
   listener_arn          = aws_globalaccelerator_listener.example.id
   endpoint_group_region = "eu-central-1"
   endpoint_configuration {
-    endpoint_id = [aws_instance.web_instance_vpc2_public.private_ip] # Здесь добавлена обертка [ ] для преобразования в список строк
+    endpoint_id = aws_instance.web_instance_vpc2_public.*.private_ip # Используем *. для передачи списка всех приватных IP
     weight       = 50
   }
 }
+
 
 
 output "global_accelerator_dns_name" {
