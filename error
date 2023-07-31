@@ -1,4 +1,4 @@
-rror: no matching EC2 Subnet found
+Error: no matching EC2 Subnet found
 │ 
 │   with data.aws_subnet.public_subnets_vpc1,
 │   on test.tf line 21, in data "aws_subnet" "public_subnets_vpc1":
@@ -11,3 +11,37 @@ rror: no matching EC2 Subnet found
 │   with data.aws_subnet.public_subnets_vpc2,
 │   on test.tf line 30, in data "aws_subnet" "public_subnets_vpc2":
 │   30: data "aws_subnet" "public_subnets_vpc2" {
+│ 
+╵
+nik@nikvmw:~/temp$ terraform plan
+╷
+│ Error: Invalid data source
+│ 
+│   on test.tf line 10, in data "aws_subnet_ids" "public_subnets_vpc1":
+│   10: data "aws_subnet_ids" "public_subnets_vpc1" {
+│ 
+│ The provider hashicorp/aws does not support data source "aws_subnet_ids".
+╵
+╷
+│ Error: Invalid data source
+│ 
+│   on test.tf line 14, in data "aws_subnet_ids" "public_subnets_vpc2":
+│   14: data "aws_subnet_ids" "public_subnets_vpc2" {
+│ 
+│ The provider hashicorp/aws does not support data source "aws_subnet_ids".
+╵
+╷
+│ Error: Reference to undeclared resource
+│ 
+│   on test.tf line 20, in resource "aws_security_group" "lb_sg_vpc1":
+│   20:   vpc_id      = aws_vpc.vpc1.id
+│ 
+│ A managed resource "aws_vpc" "vpc1" has not been declared in the root module.
+╵
+╷
+│ Error: Reference to undeclared resource
+│ 
+│   on test.tf line 25, in resource "aws_security_group" "lb_sg_vpc2":
+│   25:   vpc_id      = aws_vpc.vpc2.id
+│ 
+│ A managed resource "aws_vpc" "vpc2" has not been declared in the root module.
