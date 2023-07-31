@@ -1,14 +1,13 @@
-Error: Invalid data source
+│ Error: only alphanumeric characters and hyphens allowed in "name": "lb_vpc1"
 │ 
-│   on test.tf line 28, in data "aws_subnet_ids" "public_subnets_vpc1":
-│   28: data "aws_subnet_ids" "public_subnets_vpc1" {
+│   with aws_lb.lb_vpc1,
+│   on test.tf line 29, in resource "aws_lb" "lb_vpc1":
+│   29:   name               = "lb_vpc1"
 │ 
-│ The provider hashicorp/aws does not support data source "aws_subnet_ids".
 ╵
 ╷
-│ Error: Invalid data source
+│ Error: only alphanumeric characters and hyphens allowed in "name": "lb_vpc2"
 │ 
-│   on test.tf line 32, in data "aws_subnet_ids" "public_subnets_vpc2":
-│   32: data "aws_subnet_ids" "public_subnets_vpc2" {
-│ 
-│ The provider hashicorp/aws does not support data source "aws_subnet_ids".
+│   with aws_lb.lb_vpc2,
+│   on test.tf line 36, in resource "aws_lb" "lb_vpc2":
+│   36:   name               = "lb_vpc2"
