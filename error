@@ -1,14 +1,25 @@
- Error: Invalid escape sequence
+Error: creating ELBv2 application Load Balancer (lb-vpc1): InvalidConfigurationRequest: A load balancer cannot be attached to multiple subnets in the same Availability Zone
+│ 	status code: 400, request id: f1b4ec5a-95e1-48ef-9eeb-f55960bc1b05
 │ 
-│   on test.tf line 92, in data "template_file" "user_data_vpc1":
-│   92:     private_ip  = "\${aws_instance.web_instance_vpc1_public.private_ip}"
+│   with aws_lb.lb_vpc1,
+│   on test.tf line 44, in resource "aws_lb" "lb_vpc1":
+│   44: resource "aws_lb" "lb_vpc1" {
 │ 
-│ The symbol "$" is not a valid escape sequence selector.
 ╵
 ╷
-│ Error: Invalid escape sequence
+│ Error: creating ELBv2 application Load Balancer (lb-vpc2): InvalidConfigurationRequest: A load balancer cannot be attached to multiple subnets in the same Availability Zone
+│ 	status code: 400, request id: 4ce96153-26ac-46fc-aa50-f4aeff8c3151
 │ 
-│   on test.tf line 116, in data "template_file" "user_data_vpc2":
-│  116:     private_ip  = "\${aws_instance.web_instance_vpc2_public.private_ip}"
+│   with aws_lb.lb_vpc2,
+│   on test.tf line 52, in resource "aws_lb" "lb_vpc2":
+│   52: resource "aws_lb" "lb_vpc2" {
 │ 
-│ The symbol "$" is not a valid escape sequence selector.
+╵
+╷
+│ Error: creating EC2 Instance: InvalidAMIID.NotFound: The image id '[ami-0f34c5ea932e6f0e4]' does not exist
+│ 	status code: 400, request id: 8ffb805b-4c19-4065-ae35-d8b4b2210afd
+│ 
+│   with aws_instance.web_instance_vpc2_public,
+│   on test.tf line 120, in resource "aws_instance" "web_instance_vpc2_public":
+│  120: resource "aws_instance" "web_instance_vpc2_public" {
+│ 
