@@ -1,6 +1,6 @@
- Error: Unterminated template string
+Error: Unterminated template string
 │ 
-│   on test.tf line 215, in data "template_file" "user_data_vpc1":
+│   on test.tf line 209, in data "template_file" "user_data_vpc1":
 │  129: #!/bin/bash
 │  130: # Получение приватного IP-адреса текущего экземпляра
 │  131: PRIVATE_IP=\$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
@@ -15,7 +15,7 @@
 │  140:   <title>My Simple Website - VPC1</title>
 │  141: </head>
 │  142: <body style="background-color: lightblue;">
-│  143:   <h1 style="color: red;">Привет Дядя Дима! Но Dithih звучит! Это работает! (VPC1 - Instance $$hostname - Private IP: $$private_ip)</h1>
+│  143:   <h1 style="color: red;">Привет Дядя Дима! Но Dithih звучит! Это работает! (VPC1 - Instance \${HOSTNAME} - Private IP: \${PRIVATE_IP})</h1>
 │  144:   <img src="https://img2.akspic.ru/crops/1/0/0/8/6/168001/168001-more-voda-gidroresursy-oblako-prirodnyj_landshaft-3840x2160.jpg" alt="BMW 525tds">
 │  145: </body>
 │  146: </html>
@@ -54,7 +54,7 @@
 │  179:   <title>My Simple Website - VPC2</title>
 │  180: </head>
 │  181: <body style="background-color: lightblue;">
-│  182:   <h1 style="color: blue;">Hello from VPC2! (VPC2 - Instance $$hostname - Private IP: $$private_ip)</h1>
+│  182:   <h1 style="color: blue;">Hello from VPC2! (VPC2 - Instance \${HOSTNAME} - Private IP: \${PRIVATE_IP})</h1>
 │  183:   <img src="https://img2.akspic.ru/crops/1/0/0/8/6/168001/168001-more-voda-gidroresursy-oblako-prirodnyj_landshaft-3840x2160.jpg" alt="BMW 525tds">
 │  184: </body>
 │  185: </html>
