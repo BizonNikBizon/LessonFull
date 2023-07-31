@@ -67,7 +67,7 @@ resource "aws_globalaccelerator_accelerator" "example" {
 }
 
 resource "aws_globalaccelerator_listener" "example" {
-  accelerator_arn = aws_globalaccelerator_accelerator.example.arn
+  accelerator_arn = aws_globalaccelerator_accelerator.example.id
 
   dynamic "port_range" {
     for_each = [80]
@@ -79,7 +79,7 @@ resource "aws_globalaccelerator_listener" "example" {
 }
 
 resource "aws_globalaccelerator_endpoint_group" "vpc1_group" {
-  listener_arn          = aws_globalaccelerator_listener.example.arn
+  listener_arn          = aws_globalaccelerator_listener.example.id
   endpoint_group_region = "us-east-1"
   endpoint_configuration {
     endpoint_id = aws_instance.web_instance_vpc1_public.private_ip[0]
@@ -88,7 +88,7 @@ resource "aws_globalaccelerator_endpoint_group" "vpc1_group" {
 }
 
 resource "aws_globalaccelerator_endpoint_group" "vpc2_group" {
-  listener_arn          = aws_globalaccelerator_listener.example.arn
+  listener_arn          = aws_globalaccelerator_listener.example.id
   endpoint_group_region = "eu-central-1"
   endpoint_configuration {
     endpoint_id = aws_instance.web_instance_vpc2_public.private_ip[0]
