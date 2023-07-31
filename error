@@ -1,0 +1,8 @@
+ Error: Duplicate provider configuration
+│ 
+│   on test.tf line 135:
+│  135: provider "aws" {
+│ 
+│ A default (non-aliased) provider configuration for "aws" was already given at test.tf:2,1-15. If multiple configurations are required,
+│ set the "alias" argument for alternative configurations.
+╵
