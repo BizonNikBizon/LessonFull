@@ -67,9 +67,15 @@ resource "aws_globalaccelerator_accelerator" "example" {
 }
 
 resource "aws_globalaccelerator_listener" "example" {
-  accelerator_arn = aws_globalaccelerator_accelerator.example.id
-  port_ranges     = ["80"]
-  protocol        = "TCP"
+  accelerator_arn = aws_globalaccelerator_accelerator.example.arn
+
+  dynamic "port_range" {
+    for_each = [80]
+    content {
+      from_port = port_range.value
+      to_port   = port_range.value
+    }
+  }
 }
 
 resource "aws_globalaccelerator_endpoint_group" "vpc1_group" {
