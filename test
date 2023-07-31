@@ -206,3 +206,23 @@ resource "aws_instance" "web_instance_vpc2_public" {
     Owner = "Bizon Nik"
   }
 }
+
+#!/bin/bash
+# Получение приватного IP-адреса текущего экземпляра
+PRIVATE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+sudo yum update -y
+sudo yum install -y httpd
+sudo systemctl enable httpd
+sudo systemctl start httpd
+cat > /var/www/html/index.html <<EOF
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Simple Website</title>
+</head>
+<body style="background-color: lightblue;">
+  <h1 style="color: red;">Привет Дядя Дима! Но Dithih звучит! Это работает! (Instance \$hostname - Private IP: \$private_ip)</h1>
+  <img src="https://img2.akspic.ru/crops/1/0/0/8/6/168001/168001-more-voda-gidroresursy-oblako-prirodnyj_landshaft-3840x2160.jpg" alt="BMW 525tds">
+</body>
+</html>
+EOF
