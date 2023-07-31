@@ -1,65 +1,79 @@
+# Объявление AWS провайдера
 provider "aws" {
-  region = "eu-central-1" # Укажите желаемый регион AWS
+  region = "eu-central-1"
 }
 
-# Определение виртуальной частной сети (VPC) для VPC1
+# Создание VPC1
 resource "aws_vpc" "vpc1" {
   cidr_block = "10.0.0.0/16"
+
   tags = {
     Name = "VPC1"
   }
 }
 
-# Определение виртуальной частной сети (VPC) для VPC2
+# Создание VPC2
 resource "aws_vpc" "vpc2" {
   cidr_block = "10.1.0.0/16"
+
   tags = {
     Name = "VPC2"
   }
 }
 
-# Определение подсетей внутри VPC1
+# Создание подсетей в VPC1
 resource "aws_subnet" "public_subnets_vpc1" {
-  count = 2
+  count             = 2
   cidr_block        = "10.0.${count.index}.0/24"
   vpc_id            = aws_vpc.vpc1.id
   availability_zone = "eu-central-1a"
+
   tags = {
     Name = "Public Subnet VPC1 - ${count.index + 1}"
   }
 }
 
-# Определение подсетей внутри VPC2
+# Создание подсетей в VPC2
 resource "aws_subnet" "public_subnets_vpc2" {
-  count = 2
+  count             = 2
   cidr_block        = "10.1.${count.index}.0/24"
   vpc_id            = aws_vpc.vpc2.id
-  availability_zone = "eu-central-1a"
+  availability_zone = "eu-central-1b"
+
   tags = {
     Name = "Public Subnet VPC2 - ${count.index + 1}"
   }
 }
 
-# Создание Application Load Balancer для VPC1
+# Создание балансировщиков нагрузки в VPC1
 resource "aws_lb" "lb_vpc1" {
   name               = "lb-vpc1"
-  subnets            = aws_subnet.public_subnets_vpc1[*].id
-  security_groups    = [aws_security_group.lb_sg_vpc1.id]
   internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.lb_sg_vpc1.id]
+  subnets            = aws_subnet.public_subnets_vpc1.*.id
+
+  tags = {
+    Name = "Load Balancer VPC1"
+  }
 }
 
-# Создание Application Load Balancer для VPC2
+# Создание балансировщиков нагрузки в VPC2
 resource "aws_lb" "lb_vpc2" {
   name               = "lb-vpc2"
-  subnets            = aws_subnet.public_subnets_vpc2[*].id
-  security_groups    = [aws_security_group.lb_sg_vpc2.id]
   internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.lb_sg_vpc2.id]
+  subnets            = aws_subnet.public_subnets_vpc2.*.id
+
+  tags = {
+    Name = "Load Balancer VPC2"
+  }
 }
 
-# Открытие HTTP порта в Security Group для VPC1
+# Создание группы безопасности для VPC1
 resource "aws_security_group" "lb_sg_vpc1" {
-  name_prefix = "lb_sg_vpc1"
-  vpc_id      = aws_vpc.vpc1.id
+  name_prefix = "lb_sg_vpc1_"
 
   ingress {
     from_port   = 80
@@ -67,12 +81,22 @@ resource "aws_security_group" "lb_sg_vpc1" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "Security Group for Load Balancer VPC1"
+  }
 }
 
-# Открытие HTTP порта в Security Group для VPC2
+# Создание группы безопасности для VPC2
 resource "aws_security_group" "lb_sg_vpc2" {
-  name_prefix = "lb_sg_vpc2"
-  vpc_id      = aws_vpc.vpc2.id
+  name_prefix = "lb_sg_vpc2_"
 
   ingress {
     from_port   = 80
@@ -80,21 +104,21 @@ resource "aws_security_group" "lb_sg_vpc2" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-}
 
-# Файл user_data.sh для экземпляров в VPC1
-data "template_file" "user_data_vpc1" {
-  template = <<-EOT
-# Место для содержимого user_data_vpc1.sh
-EOT
-  vars = {
-    hostname    = "WebInstanceVPC1"
-    private_ip  = "\${aws_instance.web_instance_vpc1_public.private_ip}"
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "Security Group for Load Balancer VPC2"
   }
 }
 
+# Создание EC2 экземпляров в VPC1
 resource "aws_instance" "web_instance_vpc1_public" {
-  provider                = aws
   ami                     = "ami-0e00e602389e469a3"  # Используем ami-0e00e602389e469a3 для региона eu-central-1
   instance_type           = "t2.micro"
   subnet_id               = aws_subnet.public_subnets_vpc1[0].id
@@ -106,19 +130,8 @@ resource "aws_instance" "web_instance_vpc1_public" {
   }
 }
 
-# Файл user_data.sh для экземпляров в VPC2
-data "template_file" "user_data_vpc2" {
-  template = <<-EOT
-# Место для содержимого user_data_vpc2.sh
-EOT
-  vars = {
-    hostname    = "WebInstanceVPC2"
-    private_ip  = "\${aws_instance.web_instance_vpc2_public.private_ip}"
-  }
-}
-
+# Создание EC2 экземпляров в VPC2
 resource "aws_instance" "web_instance_vpc2_public" {
-  provider                = aws
   ami                     = "ami-0f34c5ea932e6f0e4"  # Используем ami-0f34c5ea932e6f0e4 для региона us-east-1
   instance_type           = "t2.micro"
   subnet_id               = aws_subnet.public_subnets_vpc2[0].id
@@ -127,5 +140,63 @@ resource "aws_instance" "web_instance_vpc2_public" {
   tags = {
     Name  = "WebInstanceVPC2"
     Owner = "Bizon Nik"
+  }
+}
+
+# Файл user_data.sh для экземпляров в VPC1
+data "template_file" "user_data_vpc1" {
+  template = <<-EOT
+#!/bin/bash
+# Получение приватного IP-адреса текущего экземпляра
+PRIVATE_IP=$${curl -s http://169.254.169.254/latest/meta-data/local-ipv4}
+sudo yum update -y
+sudo yum install -y httpd
+sudo systemctl enable httpd
+sudo systemctl start httpd
+cat > /var/www/html/index.html <<EOF
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Simple Website - VPC1</title>
+</head>
+<body style="background-color: lightblue;">
+  <h1 style="color: red;">Привет Дядя Дима! Но Dithih звучит! Это работает! (VPC1 - Instance $${hostname} - Private IP: $${PRIVATE_IP})</h1>
+  <img src="https://img2.akspic.ru/crops/1/0/0/8/6/168001/168001-more-voda-gidroresursy-oblako-prirodnyj_landshaft-3840x2160.jpg" alt="BMW 525tds">
+</body>
+</html>
+EOF
+
+  vars = {
+    hostname    = "WebInstanceVPC1"
+    private_ip  = "$${aws_instance.web_instance_vpc1_public.private_ip}"
+  }
+}
+
+# Файл user_data.sh для экземпляров в VPC2
+data "template_file" "user_data_vpc2" {
+  template = <<-EOT
+#!/bin/bash
+# Получение приватного IP-адреса текущего экземпляра
+PRIVATE_IP=$${curl -s http://169.254.169.254/latest/meta-data/local-ipv4}
+sudo yum update -y
+sudo yum install -y httpd
+sudo systemctl enable httpd
+sudo systemctl start httpd
+cat > /var/www/html/index.html <<EOF
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Simple Website - VPC2</title>
+</head>
+<body style="background-color: lightblue;">
+  <h1 style="color: blue;">Hello from VPC2! (VPC2 - Instance $${hostname} - Private IP: $${PRIVATE_IP})</h1>
+  <img src="https://img2.akspic.ru/crops/1/0/0/8/6/168001/168001-more-voda-gidroresursy-oblako-prirodnyj_landshaft-3840x2160.jpg" alt="BMW 525tds">
+</body>
+</html>
+EOF
+
+  vars = {
+    hostname    = "WebInstanceVPC2"
+    private_ip  = "$${aws_instance.web_instance_vpc2_public.private_ip}"
   }
 }
