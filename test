@@ -19,18 +19,18 @@ data "aws_vpc" "vpc2" {
 }
 
 data "aws_subnet" "public_subnets_vpc1" {
-  provider          = aws.vpc1
-  vpc_id            = data.aws_vpc.vpc1.id
-  cidr_block_filter = "10.0.0.0/16"
+  provider = aws.vpc1
+  vpc_id   = data.aws_vpc.vpc1.id
+
   tags = {
     "Type" = "public"
   }
 }
 
 data "aws_subnet" "public_subnets_vpc2" {
-  provider          = aws.vpc2
-  vpc_id            = data.aws_vpc.vpc2.id
-  cidr_block_filter = "10.0.0.0/16"
+  provider = aws.vpc2
+  vpc_id   = data.aws_vpc.vpc2.id
+
   tags = {
     "Type" = "public"
   }
