@@ -1,5 +1,4 @@
 provider "aws" {
-  alias  = "useast"
   region = "us-east-1"
 }
 
@@ -8,102 +7,89 @@ provider "aws" {
   region = "eu-central-1"
 }
 
-# VPC in us-east-1 region
 resource "aws_vpc" "vpc1" {
-  provider        = aws.useast
-  cidr_block      = "10.0.0.0/16"
-  instance_tenancy = "default"
+  cidr_block = "10.0.0.0/16"
 }
 
-# VPC in eu-central-1 region
 resource "aws_vpc" "vpc2" {
-  provider        = aws.eucentral
-  cidr_block      = "10.1.0.0/16"
-  instance_tenancy = "default"
+  provider   = aws.eucentral
+  cidr_block = "10.1.0.0/16"
 }
 
-# Subnets in us-east-1 region
 resource "aws_subnet" "public_subnet_vpc1" {
-  provider        = aws.useast
-  vpc_id          = aws_vpc.vpc1.id
-  cidr_block      = "10.0.1.0/24"
+  vpc_id            = aws_vpc.vpc1.id
+  cidr_block        = "10.0.1.0/24"
   availability_zone = "us-east-1a"
 }
 
-# Subnets in eu-central-1 region
 resource "aws_subnet" "public_subnet_vpc2" {
-  provider        = aws.eucentral
-  vpc_id          = aws_vpc.vpc2.id
-  cidr_block      = "10.1.1.0/24"
+  provider          = aws.eucentral
+  vpc_id            = aws_vpc.vpc2.id
+  cidr_block        = "10.1.1.0/24"
   availability_zone = "eu-central-1a"
 }
 
-# Security Group for instances in VPC1
-resource "aws_security_group" "lb_sg_vpc1" {
-  provider = aws.useast
-  vpc_id   = aws_vpc.vpc1.id
-
-  ingress {
-    description = "HTTP from Load Balancer"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    security_groups = [aws_lb.lb_vpc1.security_groups[0]]
-  }
+resource "aws_security_group" "web_sg" {
+  name_prefix = "web-sg"
+  vpc_id      = aws_vpc.vpc1.id
 }
 
-# Security Group for instances in VPC2
-resource "aws_security_group" "lb_sg_vpc2" {
-  provider = aws.eucentral
-  vpc_id   = aws_vpc.vpc2.id
-
-  ingress {
-    description = "HTTP from Load Balancer"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    security_groups = [aws_lb.lb_vpc2.security_groups[0]]
-  }
+resource "aws_security_group_rule" "web_sg_rule" {
+  type        = "ingress"
+  from_port   = 80
+  to_port     = 80
+  protocol    = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.web_sg.id
 }
 
-# Instances in VPC1
 resource "aws_instance" "web_instance_vpc1_public" {
-  provider                = aws.useast
-  ami                     = "ami-0e00e602389e469a3"
-  instance_type           = "t2.micro"
-  subnet_id               = aws_subnet.public_subnet_vpc1.id
-  vpc_security_group_ids  = [aws_security_group.lb_sg_vpc1.id]
+  ami           = "ami-0e00e602389e469a3"
+  instance_type = "t2.micro"
+  subnet_id     = aws_subnet.public_subnet_vpc1.id
+  security_groups = [aws_security_group.web_sg.id]
+
+  user_data = file("user_data_vpc1.sh")
 }
 
-# Instances in VPC2
 resource "aws_instance" "web_instance_vpc2_public" {
-  provider                = aws.eucentral
-  ami                     = "ami-0f34c5ae932e6f0e4"
-  instance_type           = "t2.micro"
-  subnet_id               = aws_subnet.public_subnet_vpc2.id
-  vpc_security_group_ids  = [aws_security_group.lb_sg_vpc2.id]
+  provider      = aws.eucentral
+  ami           = "ami-0f34c5ae932e6f0e4"
+  instance_type = "t2.micro"
+  subnet_id     = aws_subnet.public_subnet_vpc2.id
+  security_groups = [aws_security_group.web_sg.id]
+
+  user_data = file("user_data_vpc2.sh")
 }
 
-# Application Load Balancer in VPC1
-resource "aws_lb" "lb_vpc1" {
-  provider = aws.useast
-  name            = "lb_vpc1"
-  load_balancer_type = "application"
-  subnets         = [aws_subnet.public_subnet_vpc1.id]
+resource "aws_globalaccelerator_accelerator" "example" {
+  name = "example"
 }
 
-# Application Load Balancer in VPC2
-resource "aws_lb" "lb_vpc2" {
-  provider = aws.eucentral
-  name            = "lb_vpc2"
-  load_balancer_type = "application"
-  subnets         = [aws_subnet.public_subnet_vpc2.id]
+resource "aws_globalaccelerator_listener" "example" {
+  accelerator_arn = aws_globalaccelerator_accelerator.example.arn
+  port_ranges     = ["80"]
+  protocol        = "TCP"
 }
 
-output "load_balancer_dns_vpc1" {
-  value = aws_lb.lb_vpc1.dns_name
+resource "aws_globalaccelerator_endpoint_group" "vpc1_group" {
+  listener_arn          = aws_globalaccelerator_listener.example.arn
+  endpoint_group_region = "us-east-1"
+  endpoint_configuration {
+    endpoint_id = aws_instance.web_instance_vpc1_public.private_ip
+    weight       = 50
+  }
 }
 
-output "load_balancer_dns_vpc2" {
-  value = aws_lb.lb_vpc2.dns_name
+resource "aws_globalaccelerator_endpoint_group" "vpc2_group" {
+  listener_arn          = aws_globalaccelerator_listener.example.arn
+  endpoint_group_region = "eu-central-1"
+  endpoint_configuration {
+    endpoint_id = aws_instance.web_instance_vpc2_public.private_ip
+    weight       = 50
+  }
+}
+
+output "global_accelerator_dns_name" {
+  value = aws_globalaccelerator_accelerator.example.dns_name
 }
