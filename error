@@ -1,14 +1,8 @@
-Error: Invalid index
+ Error: Unclosed configuration block
 │ 
-│   on test.tf line 86, in resource "aws_globalaccelerator_endpoint_group" "vpc1_group":
-│   86:     endpoint_id = aws_instance.web_instance_vpc1_public.private_ip[0]
+│   on test.tf line 82, in resource "aws_globalaccelerator_endpoint_group" "vpc1_group":
+│   82: resource "aws_globalaccelerator_endpoint_group" "vpc1_group" {
 │ 
-│ This value does not have any indices.
+│ There is no closing brace for this block before the end of the file. This may be caused by incorrect brace nesting elsewhere in this
+│ file.
 ╵
-╷
-│ Error: Invalid index
-│ 
-│   on test.tf line 95, in resource "aws_globalaccelerator_endpoint_group" "vpc2_group":
-│   95:     endpoint_id = aws_instance.web_instance_vpc2_public.private_ip[0]
-│ 
-│ This value does not have any indices.
