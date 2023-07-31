@@ -24,115 +24,11 @@ resource "aws_subnet" "public_subnet_vpc1" {
   }
 }
 
-resource "aws_internet_gateway" "igw_vpc1" {
-  vpc_id = aws_vpc.vpc1.id
+...
 
-  tags = {
-    Owner = "Bizon Nik"
-  }
-}
-
-resource "aws_route_table" "public_route_vpc1" {
-  vpc_id = aws_vpc.vpc1.id
-
-  tags = {
-    Owner = "Bizon Nik"
-  }
-}
-
-resource "aws_route" "public_internet_route_vpc1" {
-  route_table_id         = aws_route_table.public_route_vpc1.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.igw_vpc1.id
-
-  tags = {
-    Owner = "Bizon Nik"
-  }
-}
-
-resource "aws_security_group" "lb_sg_vpc1" {
-  name_prefix = "lb_sg_vpc1"
-  vpc_id      = aws_vpc.vpc1.id
-
-  # Открываем только 80 порт для доступа к сайту по HTTP
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name  = "lb_sg_vpc1"
-    Owner = "Bizon Nik"
-  }
-}
-
-resource "aws_lb" "alb_vpc1" {
-  name               = "alb-vpc1"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.lb_sg_vpc1.id]
-  subnets            = [aws_subnet.public_subnet_vpc1.id]
-
-  tags = {
-    Name  = "alb-vpc1"
-    Owner = "Bizon Nik"
-  }
-}
-
-# Файл user_data.sh для экземпляров в VPC1
-data "template_file" "user_data_vpc1" {
-  template = <<-EOT
-#!/bin/bash
-
-# Получение приватного IP-адреса текущего экземпляра
-PRIVATE_IP=\$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
-
-sudo yum update -y
-sudo yum install -y httpd
-sudo systemctl enable httpd
-sudo systemctl start httpd
-
-cat > /var/www/html/index.html <<EOF
-<!DOCTYPE html>
-<html>
-<head>
-  <title>My Simple Website - VPC1</title>
-</head>
-<body style="background-color: lightblue;">
-  <h1 style="color: red;">Привет Дядя Дима! Но Dithih звучит! Это работает! (VPC1 - Instance \${HOSTNAME} - Private IP: \${PRIVATE_IP})</h1>
-  <img src="https://img2.akspic.ru/crops/1/0/0/8/6/168001/168001-more-voda-gidroresursy-oblako-prirodnyj_landshaft-3840x2160.jpg" alt="BMW 525tds">
-</body>
-</html>
-EOF
-EOT
-}
-
-resource "aws_instance" "web_instance_vpc1_public" {
-  ami           = "ami-0e00e602389e469a3"  # Используем ami-0e00e602389e469a3 для региона eu-central-1
-  instance_type = "t2.micro"
-
-  subnet_id               = aws_subnet.public_subnet_vpc1.id
-  vpc_security_group_ids  = [aws_security_group.lb_sg_vpc1.id]
-  user_data               = data.template_file.user_data_vpc1.rendered
-
-  # Вариант 1: Используем метаданные экземпляра для получения информации о самом экземпляре
-  # В этом варианте вы увидите ID каждого инстанса, но не IP-адрес, так как IP-адрес будет внутренним в VPC.
-  # Айпи адрес балансировщика будет публичным и к нему можно обратиться для получения доступа к сайту.
-  metadata_options {
-    http_endpoint               = "enabled"
-    http_put_response_hop_limit = 2
-  }
-
-  tags = {
-    Name  = "WebInstanceVPC1"
-    Owner = "Bizon Nik"
-  }
-}
-
-# Провайдер для региона us-east-1
+# Провайдер для региона us-east-1 с псевдонимом "us-east-1"
 provider "aws" {
+  alias  = "us-east-1"
   region = "us-east-1"
 }
 
@@ -157,51 +53,11 @@ resource "aws_subnet" "public_subnet_vpc2" {
   }
 }
 
-resource "aws_internet_gateway" "igw_vpc2" {
-  vpc_id = aws_vpc.vpc2.id
+...
 
-  tags = {
-    Owner = "Bizon Nik"
-  }
-}
-
-resource "aws_route_table" "public_route_vpc2" {
-  vpc_id = aws_vpc.vpc2.id
-
-  tags = {
-    Owner = "Bizon Nik"
-  }
-}
-
-resource "aws_route" "public_internet_route_vpc2" {
-  route_table_id         = aws_route_table.public_route_vpc2.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.igw_vpc2.id
-
-  tags = {
-    Owner = "Bizon Nik"
-  }
-}
-
-resource "aws_security_group" "lb_sg_vpc2" {
-  name_prefix = "lb_sg_vpc2"
-  vpc_id      = aws_vpc.vpc2.id
-
-  # Открываем только 80 порт для доступа к сайту по HTTP
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name  = "lb_sg_vpc2"
-    Owner = "Bizon Nik"
-  }
-}
-
+# В этом блоке используется провайдер с псевдонимом "us-east-1"
 resource "aws_lb" "alb_vpc2" {
+  provider            = aws.us-east-1
   name               = "alb-vpc2"
   internal           = false
   load_balancer_type = "application"
@@ -214,35 +70,11 @@ resource "aws_lb" "alb_vpc2" {
   }
 }
 
-# Файл user_data.sh для экземпляров в VPC2
-data "template_file" "user_data_vpc2" {
-  template = <<-EOT
-#!/bin/bash
+...
 
-# Получение приватного IP-адреса текущего экземпляра
-PRIVATE_IP=\$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
-
-sudo yum update -y
-sudo yum install -y httpd
-sudo systemctl enable httpd
-sudo systemctl start httpd
-
-cat > /var/www/html/index.html <<EOF
-<!DOCTYPE html>
-<html>
-<head>
-  <title>My Simple Website - VPC2</title>
-</head>
-<body style="background-color: lightblue;">
-  <h1 style="color: blue;">Hello from VPC2! (VPC2 - Instance \${HOSTNAME} - Private IP: \${PRIVATE_IP})</h1>
-  <img src="https://img2.akspic.ru/crops/1/0/0/8/6/168001/168001-more-voda-gidroresursy-oblako-prirodnyj_landshaft-3840x2160.jpg" alt="BMW 525tds">
-</body>
-</html>
-EOF
-EOT
-}
-
+# В этом блоке также используется провайдер с псевдонимом "us-east-1"
 resource "aws_instance" "web_instance_vpc2_public" {
+  provider            = aws.us-east-1
   ami           = "ami-0f34c5ea932e6f0e4"  # Используем ami-0f34c5ea932e6f0e4 для региона us-east-1
   instance_type = "t2.micro"
 
