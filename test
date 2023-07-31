@@ -25,35 +25,38 @@ resource "aws_security_group" "lb_sg_vpc2" {
   vpc_id      = aws_vpc.vpc2.id
 }
 
-data "aws_subnet_ids" "public_subnets_vpc1" {
-  vpc_id = aws_vpc.vpc1.id
-}
-
-data "aws_subnet_ids" "public_subnets_vpc2" {
-  vpc_id = aws_vpc.vpc2.id
-}
-
 resource "aws_lb" "lb_vpc1" {
   name               = "lb_vpc1"
   load_balancer_type = "application"
   security_groups    = [aws_security_group.lb_sg_vpc1.id]
-  subnets            = data.aws_subnet_ids.public_subnets_vpc1.ids
+  subnets            = aws_subnet.public_subnets_vpc1.*.id
 }
 
 resource "aws_lb" "lb_vpc2" {
   name               = "lb_vpc2"
   load_balancer_type = "application"
   security_groups    = [aws_security_group.lb_sg_vpc2.id]
-  subnets            = data.aws_subnet_ids.public_subnets_vpc2.ids
+  subnets            = aws_subnet.public_subnets_vpc2.*.id
+}
+
+resource "aws_subnet" "public_subnets_vpc1" {
+  vpc_id            = aws_vpc.vpc1.id
+  cidr_block        = "10.0.1.0/24"
+  availability_zone = "eu-central-1a"
+}
+
+resource "aws_subnet" "public_subnets_vpc2" {
+  vpc_id            = aws_vpc.vpc2.id
+  cidr_block        = "10.1.1.0/24"
+  availability_zone = "us-east-1a"
 }
 
 resource "aws_instance" "web_instance_vpc1_public" {
-  provider              = aws.useast
-  count                 = length(data.aws_subnet_ids.public_subnets_vpc1.ids)
-  ami                   = "ami-0e00e602389e469a3"
-  instance_type         = "t2.micro"
-  subnet_id             = element(data.aws_subnet_ids.public_subnets_vpc1.ids, count.index)
-  vpc_security_group_ids  = [aws_security_group.lb_sg_vpc1.id]
+  provider        = aws.useast
+  ami             = "ami-0e00e602389e469a3"
+  instance_type   = "t2.micro"
+  subnet_id       = aws_subnet.public_subnets_vpc1.id
+  vpc_security_group_ids = [aws_security_group.lb_sg_vpc1.id]
   tags = {
     Name  = "WebInstanceVPC1"
     Owner = "Bizon Nik"
@@ -61,12 +64,11 @@ resource "aws_instance" "web_instance_vpc1_public" {
 }
 
 resource "aws_instance" "web_instance_vpc2_public" {
-  provider              = aws.useast
-  count                 = length(data.aws_subnet_ids.public_subnets_vpc2.ids)
-  ami                   = "ami-0f34c5ea932e6f0e4"
-  instance_type         = "t2.micro"
-  subnet_id             = element(data.aws_subnet_ids.public_subnets_vpc2.ids, count.index)
-  vpc_security_group_ids  = [aws_security_group.lb_sg_vpc2.id]
+  provider        = aws.useast
+  ami             = "ami-0f34c5ea932e6f0e4"
+  instance_type   = "t2.micro"
+  subnet_id       = aws_subnet.public_subnets_vpc2.id
+  vpc_security_group_ids = [aws_security_group.lb_sg_vpc2.id]
   tags = {
     Name  = "WebInstanceVPC2"
     Owner = "Bizon Nik"
