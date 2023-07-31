@@ -1,58 +1,52 @@
 provider "aws" {
   region = "eu-central-1"
-  alias  = "vpc1"
 }
 
 provider "aws" {
+  alias  = "useast"
   region = "us-east-1"
-  alias  = "vpc2"
 }
 
-data "aws_vpc" "vpc1" {
-  provider = aws.vpc1
-  default  = true
+data "aws_subnet_ids" "public_subnets_vpc1" {
+  vpc_id = aws_vpc.vpc1.id
 }
 
-data "aws_vpc" "vpc2" {
-  provider = aws.vpc2
-  default  = true
-}
-
-data "aws_subnet" "public_subnets_vpc1" {
-  provider = aws.vpc1
-  vpc_id   = data.aws_vpc.vpc1.id
-
-  tags = {
-    "Type" = "public"
-  }
-}
-
-data "aws_subnet" "public_subnets_vpc2" {
-  provider = aws.vpc2
-  vpc_id   = data.aws_vpc.vpc2.id
-
-  tags = {
-    "Type" = "public"
-  }
+data "aws_subnet_ids" "public_subnets_vpc2" {
+  vpc_id = aws_vpc.vpc2.id
 }
 
 resource "aws_security_group" "lb_sg_vpc1" {
-  name_prefix = "lb_sg_vpc1-"
-  vpc_id      = data.aws_vpc.vpc1.id
+  name_prefix = "lb_sg_vpc1"
+  vpc_id      = aws_vpc.vpc1.id
 }
 
 resource "aws_security_group" "lb_sg_vpc2" {
-  name_prefix = "lb_sg_vpc2-"
-  vpc_id      = data.aws_vpc.vpc2.id
+  name_prefix = "lb_sg_vpc2"
+  vpc_id      = aws_vpc.vpc2.id
+}
+
+resource "aws_lb" "lb_vpc1" {
+  name               = "lb_vpc1"
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.lb_sg_vpc1.id]
+  subnets            = data.aws_subnet_ids.public_subnets_vpc1.ids
+}
+
+resource "aws_lb" "lb_vpc2" {
+  name               = "lb_vpc2"
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.lb_sg_vpc2.id]
+  subnets            = data.aws_subnet_ids.public_subnets_vpc2.ids
 }
 
 resource "aws_instance" "web_instance_vpc1_public" {
-  provider                = aws.vpc1
-  ami                     = "ami-0e00e602389e469a3"  # Используем ami-0e00e602389e469a3 для региона eu-central-1
-  instance_type           = "t2.micro"
-  subnet_id               = data.aws_subnet.public_subnets_vpc1.id
+  provider              = aws.useast
+  count                 = length(data.aws_subnet_ids.public_subnets_vpc1.ids)
+  ami                   = "ami-0e00e602389e469a3"
+  instance_type         = "t2.micro"
+  subnet_id             = data.aws_subnet.public_subnets_vpc1.*.id[count.index]
   vpc_security_group_ids  = [aws_security_group.lb_sg_vpc1.id]
-
+  user_data             = filebase64("${path.module}/user_data.sh")
   tags = {
     Name  = "WebInstanceVPC1"
     Owner = "Bizon Nik"
@@ -60,12 +54,13 @@ resource "aws_instance" "web_instance_vpc1_public" {
 }
 
 resource "aws_instance" "web_instance_vpc2_public" {
-  provider                = aws.vpc2
-  ami                     = "ami-0f34c5ea932e6f0e4"  # Используем ami-0f34c5ea932e6f0e4 для региона us-east-1
-  instance_type           = "t2.micro"
-  subnet_id               = data.aws_subnet.public_subnets_vpc2.id
+  provider              = aws.useast
+  count                 = length(data.aws_subnet_ids.public_subnets_vpc2.ids)
+  ami                   = "ami-0f34c5ea932e6f0e4"
+  instance_type         = "t2.micro"
+  subnet_id             = data.aws_subnet.public_subnets_vpc2.*.id[count.index]
   vpc_security_group_ids  = [aws_security_group.lb_sg_vpc2.id]
-
+  user_data             = filebase64("${path.module}/user_data.sh")
   tags = {
     Name  = "WebInstanceVPC2"
     Owner = "Bizon Nik"
