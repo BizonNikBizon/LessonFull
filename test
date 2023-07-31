@@ -127,15 +127,12 @@ resource "aws_security_group" "lb_sg_vpc2" {
 data "template_file" "user_data_vpc1" {
   template = <<-EOT
 #!/bin/bash
-
 # Получение приватного IP-адреса текущего экземпляра
 PRIVATE_IP=\$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
-
 sudo yum update -y
 sudo yum install -y httpd
 sudo systemctl enable httpd
 sudo systemctl start httpd
-
 cat > /var/www/html/index.html <<EOF
 <!DOCTYPE html>
 <html>
@@ -143,11 +140,12 @@ cat > /var/www/html/index.html <<EOF
   <title>My Simple Website - VPC1</title>
 </head>
 <body style="background-color: lightblue;">
-  <h1 style="color: red;">Привет Дядя Дима! Но Dithih звучит! Это работает! (VPC1 - Instance $$hostname - Private IP: $$private_ip)</h1>
+  <h1 style="color: red;">Привет Дядя Дима! Но Dithih звучит! Это работает! (VPC1 - Instance \${HOSTNAME} - Private IP: \${PRIVATE_IP})</h1>
   <img src="https://img2.akspic.ru/crops/1/0/0/8/6/168001/168001-more-voda-gidroresursy-oblako-prirodnyj_landshaft-3840x2160.jpg" alt="BMW 525tds">
 </body>
 </html>
 EOF
+
   vars = {
     hostname    = "WebInstanceVPC1"
     private_ip  = "\${aws_instance.web_instance_vpc1_public.private_ip}"
@@ -161,7 +159,6 @@ resource "aws_instance" "web_instance_vpc1_public" {
   subnet_id               = aws_subnet.public_subnet_vpc1.id
   vpc_security_group_ids  = [aws_security_group.lb_sg_vpc1.id]
   user_data               = data.template_file.user_data_vpc1.rendered
-
   tags = {
     Name  = "WebInstanceVPC1"
     Owner = "Bizon Nik"
@@ -172,15 +169,12 @@ resource "aws_instance" "web_instance_vpc1_public" {
 data "template_file" "user_data_vpc2" {
   template = <<-EOT
 #!/bin/bash
-
 # Получение приватного IP-адреса текущего экземпляра
 PRIVATE_IP=\$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
-
 sudo yum update -y
 sudo yum install -y httpd
 sudo systemctl enable httpd
 sudo systemctl start httpd
-
 cat > /var/www/html/index.html <<EOF
 <!DOCTYPE html>
 <html>
@@ -188,11 +182,12 @@ cat > /var/www/html/index.html <<EOF
   <title>My Simple Website - VPC2</title>
 </head>
 <body style="background-color: lightblue;">
-  <h1 style="color: blue;">Hello from VPC2! (VPC2 - Instance $$hostname - Private IP: $$private_ip)</h1>
+  <h1 style="color: blue;">Hello from VPC2! (VPC2 - Instance \${HOSTNAME} - Private IP: \${PRIVATE_IP})</h1>
   <img src="https://img2.akspic.ru/crops/1/0/0/8/6/168001/168001-more-voda-gidroresursy-oblako-prirodnyj_landshaft-3840x2160.jpg" alt="BMW 525tds">
 </body>
 </html>
 EOF
+
   vars = {
     hostname    = "WebInstanceVPC2"
     private_ip  = "\${aws_instance.web_instance_vpc2_public.private_ip}"
@@ -206,7 +201,6 @@ resource "aws_instance" "web_instance_vpc2_public" {
   subnet_id               = aws_subnet.public_subnet_vpc2.id
   vpc_security_group_ids  = [aws_security_group.lb_sg_vpc2.id]
   user_data               = data.template_file.user_data_vpc2.rendered
-
   tags = {
     Name  = "WebInstanceVPC2"
     Owner = "Bizon Nik"
