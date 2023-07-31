@@ -123,20 +123,6 @@ resource "aws_security_group" "lb_sg_vpc2" {
   }
 }
 
-# Создание Application Load Balancer и EC2 Instance для региона eu-central-1
-resource "aws_lb" "alb_vpc1" {
-  name               = "alb-vpc1"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.lb_sg_vpc1.id]
-  subnets            = [aws_subnet.public_subnet_vpc1.id]
-
-  tags = {
-    Name  = "alb-vpc1"
-    Owner = "Bizon Nik"
-  }
-}
-
 # Файл user_data.sh для экземпляров в VPC1
 data "template_file" "user_data_vpc1" {
   template = <<-EOT
@@ -157,12 +143,15 @@ cat > /var/www/html/index.html <<EOF
   <title>My Simple Website - VPC1</title>
 </head>
 <body style="background-color: lightblue;">
-  <h1 style="color: red;">Привет Дядя Дима! Но Dithih звучит! Это работает! (VPC1 - Instance \${HOSTNAME} - Private IP: \${PRIVATE_IP})</h1>
+  <h1 style="color: red;">Привет Дядя Дима! Но Dithih звучит! Это работает! (VPC1 - Instance $hostname - Private IP: $private_ip)</h1>
   <img src="https://img2.akspic.ru/crops/1/0/0/8/6/168001/168001-more-voda-gidroresursy-oblako-prirodnyj_landshaft-3840x2160.jpg" alt="BMW 525tds">
 </body>
 </html>
 EOF
-EOT
+  vars = {
+    hostname    = "WebInstanceVPC1"
+    private_ip  = "\${aws_instance.web_instance_vpc1_public.private_ip}"
+  }
 }
 
 resource "aws_instance" "web_instance_vpc1_public" {
@@ -175,20 +164,6 @@ resource "aws_instance" "web_instance_vpc1_public" {
 
   tags = {
     Name  = "WebInstanceVPC1"
-    Owner = "Bizon Nik"
-  }
-}
-
-# Создание Application Load Balancer и EC2 Instance для региона us-east-1
-resource "aws_lb" "alb_vpc2" {
-  name               = "alb-vpc2"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.lb_sg_vpc2.id]
-  subnets            = [aws_subnet.public_subnet_vpc2.id]
-
-  tags = {
-    Name  = "alb-vpc2"
     Owner = "Bizon Nik"
   }
 }
@@ -213,12 +188,15 @@ cat > /var/www/html/index.html <<EOF
   <title>My Simple Website - VPC2</title>
 </head>
 <body style="background-color: lightblue;">
-  <h1 style="color: blue;">Hello from VPC2! (VPC2 - Instance \${HOSTNAME} - Private IP: \${PRIVATE_IP})</h1>
+  <h1 style="color: blue;">Hello from VPC2! (VPC2 - Instance $hostname - Private IP: $private_ip)</h1>
   <img src="https://img2.akspic.ru/crops/1/0/0/8/6/168001/168001-more-voda-gidroresursy-oblako-prirodnyj_landshaft-3840x2160.jpg" alt="BMW 525tds">
 </body>
 </html>
 EOF
-EOT
+  vars = {
+    hostname    = "WebInstanceVPC2"
+    private_ip  = "\${aws_instance.web_instance_vpc2_public.private_ip}"
+  }
 }
 
 resource "aws_instance" "web_instance_vpc2_public" {
