@@ -60,8 +60,9 @@ resource "aws_security_group" "lb_sg_vpc1" {
   }
 }
 
-# Провайдер для региона us-east-1
+# Провайдер для региона us-east-1 с алиасом "useast"
 provider "aws" {
+  alias  = "useast"
   region = "us-east-1"
 }
 
@@ -165,20 +166,12 @@ EOT
 }
 
 resource "aws_instance" "web_instance_vpc1_public" {
-  ami           = "ami-0e00e602389e469a3"  # Используем ami-0e00e602389e469a3 для региона eu-central-1
-  instance_type = "t2.micro"
-
+  provider                = aws.useast
+  ami                     = "ami-0e00e602389e469a3"  # Используем ami-0e00e602389e469a3 для региона eu-central-1
+  instance_type           = "t2.micro"
   subnet_id               = aws_subnet.public_subnet_vpc1.id
   vpc_security_group_ids  = [aws_security_group.lb_sg_vpc1.id]
   user_data               = data.template_file.user_data_vpc1.rendered
-
-  # Вариант 1: Используем метаданные экземпляра для получения информации о самом экземпляре
-  # В этом варианте вы увидите ID каждого инстанса, но не IP-адрес, так как IP-адрес будет внутренним в VPC.
-  # Айпи адрес балансировщика будет публичным и к нему можно обратиться для получения доступа к сайту.
-  metadata_options {
-    http_endpoint               = "enabled"
-    http_put_response_hop_limit = 2
-  }
 
   tags = {
     Name  = "WebInstanceVPC1"
@@ -229,20 +222,12 @@ EOT
 }
 
 resource "aws_instance" "web_instance_vpc2_public" {
-  ami           = "ami-0f34c5ea932e6f0e4"  # Используем ami-0f34c5ea932e6f0e4 для региона us-east-1
-  instance_type = "t2.micro"
-
+  provider                = aws.useast
+  ami                     = "ami-0f34c5ea932e6f0e4"  # Используем ami-0f34c5ea932e6f0e4 для региона us-east-1
+  instance_type           = "t2.micro"
   subnet_id               = aws_subnet.public_subnet_vpc2.id
   vpc_security_group_ids  = [aws_security_group.lb_sg_vpc2.id]
   user_data               = data.template_file.user_data_vpc2.rendered
-
-  # Вариант 1: Используем метаданные экземпляра для получения информации о самом экземпляре
-  # В этом варианте вы увидите ID каждого инстанса, но не IP-адрес, так как IP-адрес будет внутренним в VPC.
-  # Айпи адрес балансировщика будет публичным и к нему можно обратиться для получения доступа к сайту.
-  metadata_options {
-    http_endpoint               = "enabled"
-    http_put_response_hop_limit = 2
-  }
 
   tags = {
     Name  = "WebInstanceVPC2"
