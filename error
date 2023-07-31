@@ -1,13 +1,25 @@
-│ Error: only alphanumeric characters and hyphens allowed in "name": "lb_vpc1"
+Error: creating ELBv2 application Load Balancer (lb-vpc1): ValidationError: At least two subnets in two different Availability Zones must be specified
+│ 	status code: 400, request id: 09be61f3-0694-4a48-a055-b03fafe0bac5
 │ 
 │   with aws_lb.lb_vpc1,
-│   on test.tf line 29, in resource "aws_lb" "lb_vpc1":
-│   29:   name               = "lb_vpc1"
+│   on test.tf line 28, in resource "aws_lb" "lb_vpc1":
+│   28: resource "aws_lb" "lb_vpc1" {
 │ 
 ╵
 ╷
-│ Error: only alphanumeric characters and hyphens allowed in "name": "lb_vpc2"
+│ Error: creating EC2 Subnet: InvalidParameterValue: Value (us-east-1a) for parameter availabilityZone is invalid. Subnets can currently only be created in the following availability zones: eu-central-1a, eu-central-1b, eu-central-1c.
+│ 	status code: 400, request id: d7215921-a3b1-4245-b0cf-d33f93810fca
 │ 
-│   with aws_lb.lb_vpc2,
-│   on test.tf line 36, in resource "aws_lb" "lb_vpc2":
-│   36:   name               = "lb_vpc2"
+│   with aws_subnet.public_subnets_vpc2,
+│   on test.tf line 48, in resource "aws_subnet" "public_subnets_vpc2":
+│   48: resource "aws_subnet" "public_subnets_vpc2" {
+│ 
+╵
+╷
+│ Error: creating EC2 Instance: InvalidAMIID.NotFound: The image id '[ami-0e00e602389e469a3]' does not exist
+│ 	status code: 400, request id: 114dc279-c42c-4521-919d-a955d08c1139
+│ 
+│   with aws_instance.web_instance_vpc1_public,
+│   on test.tf line 54, in resource "aws_instance" "web_instance_vpc1_public":
+│   54: resource "aws_instance" "web_instance_vpc1_public" {
+│ 
