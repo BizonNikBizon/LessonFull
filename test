@@ -1,7 +1,9 @@
+# Провайдер для региона eu-central-1
 provider "aws" {
   region = "eu-central-1"
 }
 
+# Создание VPC и подсетей для региона eu-central-1
 resource "aws_vpc" "vpc1" {
   cidr_block = "10.0.0.0/16"
 
@@ -129,11 +131,12 @@ resource "aws_instance" "web_instance_vpc1_public" {
   }
 }
 
-# Создание VPC и подсети для региона us-east-1
+# Провайдер для региона us-east-1
 provider "aws" {
   region = "us-east-1"
 }
 
+# Создание VPC и подсетей для региона us-east-1
 resource "aws_vpc" "vpc2" {
   cidr_block = "10.1.0.0/16"
 
