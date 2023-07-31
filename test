@@ -76,7 +76,7 @@ resource "aws_globalaccelerator_endpoint_group" "vpc1_group" {
   listener_arn          = aws_globalaccelerator_listener.example.arn
   endpoint_group_region = "us-east-1"
   endpoint_configuration {
-    endpoint_id = aws_instance.web_instance_vpc1_public.private_ip
+    endpoint_id = aws_instance.web_instance_vpc1_public.private_ip[0]
     weight       = 50
   }
 }
@@ -85,7 +85,7 @@ resource "aws_globalaccelerator_endpoint_group" "vpc2_group" {
   listener_arn          = aws_globalaccelerator_listener.example.arn
   endpoint_group_region = "eu-central-1"
   endpoint_configuration {
-    endpoint_id = aws_instance.web_instance_vpc2_public.private_ip
+    endpoint_id = aws_instance.web_instance_vpc2_public.private_ip[0]
     weight       = 50
   }
 }
