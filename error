@@ -1,8 +1,9 @@
-╷
 │ Error: Incorrect attribute value type
 │ 
 │   on test.tf line 86, in resource "aws_globalaccelerator_endpoint_group" "vpc1_group":
-│   86:     endpoint_id = [aws_instance.web_instance_vpc1_public.private_ip] # Здесь добавлена обертка [ ] для преобразования в список строк
+│   86:     endpoint_id = aws_instance.web_instance_vpc1_public.*.private_ip # Используем *. для передачи списка всех приватных IP
+│     ├────────────────
+│     │ aws_instance.web_instance_vpc1_public is object with 59 attributes
 │ 
 │ Inappropriate value for attribute "endpoint_id": string required.
 ╵
@@ -10,6 +11,8 @@
 │ Error: Incorrect attribute value type
 │ 
 │   on test.tf line 95, in resource "aws_globalaccelerator_endpoint_group" "vpc2_group":
-│   95:     endpoint_id = [aws_instance.web_instance_vpc2_public.private_ip] # Здесь добавлена обертка [ ] для преобразования в список строк
+│   95:     endpoint_id = aws_instance.web_instance_vpc2_public.*.private_ip # Используем *. для передачи списка всех приватных IP
+│     ├────────────────
+│     │ aws_instance.web_instance_vpc2_public is object with 59 attributes
 │ 
 │ Inappropriate value for attribute "endpoint_id": string required.
