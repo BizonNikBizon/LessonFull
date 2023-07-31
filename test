@@ -68,6 +68,7 @@ resource "aws_globalaccelerator_accelerator" "example" {
 
 resource "aws_globalaccelerator_listener" "example" {
   accelerator_arn = aws_globalaccelerator_accelerator.example.id
+  protocol        = "TCP"
 
   dynamic "port_range" {
     for_each = [80]
