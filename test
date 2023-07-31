@@ -143,7 +143,7 @@ cat > /var/www/html/index.html <<EOF
   <title>My Simple Website - VPC1</title>
 </head>
 <body style="background-color: lightblue;">
-  <h1 style="color: red;">Привет Дядя Дима! Но Dithih звучит! Это работает! (VPC1 - Instance $hostname - Private IP: $private_ip)</h1>
+  <h1 style="color: red;">Привет Дядя Дима! Но Dithih звучит! Это работает! (VPC1 - Instance $$hostname - Private IP: $$private_ip)</h1>
   <img src="https://img2.akspic.ru/crops/1/0/0/8/6/168001/168001-more-voda-gidroresursy-oblako-prirodnyj_landshaft-3840x2160.jpg" alt="BMW 525tds">
 </body>
 </html>
@@ -188,7 +188,7 @@ cat > /var/www/html/index.html <<EOF
   <title>My Simple Website - VPC2</title>
 </head>
 <body style="background-color: lightblue;">
-  <h1 style="color: blue;">Hello from VPC2! (VPC2 - Instance $hostname - Private IP: $private_ip)</h1>
+  <h1 style="color: blue;">Hello from VPC2! (VPC2 - Instance $$hostname - Private IP: $$private_ip)</h1>
   <img src="https://img2.akspic.ru/crops/1/0/0/8/6/168001/168001-more-voda-gidroresursy-oblako-prirodnyj_landshaft-3840x2160.jpg" alt="BMW 525tds">
 </body>
 </html>
