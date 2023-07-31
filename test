@@ -24,7 +24,41 @@ resource "aws_subnet" "public_subnet_vpc1" {
   }
 }
 
-...
+# Создание Security Group для VPC1
+resource "aws_security_group" "lb_sg_vpc1" {
+  name_prefix = "lb_sg_vpc1_"
+  vpc_id      = aws_vpc.vpc1.id
+
+  # Разрешаем HTTP и SSH доступы
+  ingress {
+    description = "HTTP"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Разрешаем все исходящие соединения
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name  = "LB Security Group VPC1"
+    Owner = "Bizon Nik"
+  }
+}
 
 # Провайдер для региона us-east-1
 provider "aws" {
@@ -52,7 +86,41 @@ resource "aws_subnet" "public_subnet_vpc2" {
   }
 }
 
-...
+# Создание Security Group для VPC2
+resource "aws_security_group" "lb_sg_vpc2" {
+  name_prefix = "lb_sg_vpc2_"
+  vpc_id      = aws_vpc.vpc2.id
+
+  # Разрешаем HTTP и SSH доступы
+  ingress {
+    description = "HTTP"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Разрешаем все исходящие соединения
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name  = "LB Security Group VPC2"
+    Owner = "Bizon Nik"
+  }
+}
 
 # Создание Application Load Balancer и EC2 Instance для региона eu-central-1
 resource "aws_lb" "alb_vpc1" {
