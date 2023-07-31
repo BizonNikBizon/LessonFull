@@ -1,6 +1,9 @@
-Error: Argument or block definition required
+Error: Duplicate provider configuration
 │ 
-│   on test.tf line 27:
-│   27: ...
+│   on test.tf line 64:
+│   64: provider "aws" {
 │ 
-│ An argument or block definition is required here.
+│ A default (non-aliased) provider configuration for "aws" was already given at test.tf:2,1-15. If multiple configurations are required,
+│ set the "alias" argument for alternative configurations.
+╵
+
