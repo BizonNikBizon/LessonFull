@@ -1,8 +1,15 @@
- Error: Unclosed configuration block
+Error: Incorrect attribute value type
 │ 
-│   on test.tf line 82, in resource "aws_globalaccelerator_endpoint_group" "vpc1_group":
-│   82: resource "aws_globalaccelerator_endpoint_group" "vpc1_group" {
+│   on test.tf line 86, in resource "aws_globalaccelerator_endpoint_group" "vpc1_group":
+│   86:     endpoint_id = [aws_instance.web_instance_vpc1_public.private_ip]
 │ 
-│ There is no closing brace for this block before the end of the file. This may be caused by incorrect brace nesting elsewhere in this
-│ file.
+│ Inappropriate value for attribute "endpoint_id": string required.
+╵
+╷
+│ Error: Incorrect attribute value type
+│ 
+│   on test.tf line 95, in resource "aws_globalaccelerator_endpoint_group" "vpc2_group":
+│   95:     endpoint_id = [aws_instance.web_instance_vpc2_public.private_ip]
+│ 
+│ Inappropriate value for attribute "endpoint_id": string required.
 ╵
