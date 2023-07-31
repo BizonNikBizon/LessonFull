@@ -1,6 +1,6 @@
-│ Error: Unsupported attribute
+ Error: Missing required argument
 │ 
-│   on test.tf line 70, in resource "aws_globalaccelerator_listener" "example":
-│   70:   accelerator_arn = aws_globalaccelerator_accelerator.example.arn
+│   on test.tf line 69, in resource "aws_globalaccelerator_listener" "example":
+│   69: resource "aws_globalaccelerator_listener" "example" {
 │ 
-│ This object has no argument, nested block, or exported attribute named "arn".
+│ The argument "protocol" is required, but no definition was found.
