@@ -1,14 +1,6 @@
- Error: Insufficient port_range blocks
+│ Error: Unsupported attribute
 │ 
-│   on test.tf line 69, in resource "aws_globalaccelerator_listener" "example":
-│   69: resource "aws_globalaccelerator_listener" "example" {
+│   on test.tf line 70, in resource "aws_globalaccelerator_listener" "example":
+│   70:   accelerator_arn = aws_globalaccelerator_accelerator.example.arn
 │ 
-│ At least 1 "port_range" blocks are required.
-╵
-╷
-│ Error: Unsupported argument
-│ 
-│   on test.tf line 71, in resource "aws_globalaccelerator_listener" "example":
-│   71:   port_ranges     = ["80"]
-│ 
-│ An argument named "port_ranges" is not expected here.
+│ This object has no argument, nested block, or exported attribute named "arn".
