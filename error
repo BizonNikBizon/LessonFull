@@ -1,14 +1,14 @@
-│ Error: Invalid data source
+Error: Unsupported argument
 │ 
-│   on test.tf line 16, in data "aws_subnet_ids" "public_subnets_vpc1":
-│   16: data "aws_subnet_ids" "public_subnets_vpc1" {
+│   on test.tf line 24, in data "aws_subnet" "public_subnets_vpc1":
+│   24:   cidr_block_filter = "10.0.0.0/16"
 │ 
-│ The provider hashicorp/aws does not support data source "aws_subnet_ids".
+│ An argument named "cidr_block_filter" is not expected here.
 ╵
 ╷
-│ Error: Invalid data source
+│ Error: Unsupported argument
 │ 
-│   on test.tf line 26, in data "aws_subnet_ids" "public_subnets_vpc2":
-│   26: data "aws_subnet_ids" "public_subnets_vpc2" {
+│   on test.tf line 33, in data "aws_subnet" "public_subnets_vpc2":
+│   33:   cidr_block_filter = "10.0.0.0/16"
 │ 
-│ The provider hashicorp/aws does not support data source "aws_subnet_ids".
+│ An argument named "cidr_block_filter" is not expected here.
