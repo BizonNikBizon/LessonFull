@@ -1,76 +1,41 @@
-provider "aws" {
-  region = "eu-central-1"
-}
+#!/bin/bash
+# Получение приватного IP-адреса текущего экземпляра
+PRIVATE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+sudo yum update -y
+sudo yum install -y httpd
+sudo systemctl enable httpd
+sudo systemctl start httpd
+cat > /var/www/html/index.html <<EOF
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Simple Website - VPC1</title>
+</head>
+<body style="background-color: lightblue;">
+  <h1 style="color: red;">Привет Дядя Дима! Но Dithih звучит! Это работает! (VPC1 - Instance $$hostname - Private IP: $$private_ip)</h1>
+  <img src="https://img2.akspic.ru/crops/1/0/0/8/6/168001/168001-more-voda-gidroresursy-oblako-prirodnyj_landshaft-3840x2160.jpg" alt="BMW 525tds">
+</body>
+</html>
+EOF
 
-provider "aws" {
-  alias  = "useast"
-  region = "us-east-1"
-}
 
-resource "aws_vpc" "vpc1" {
-  cidr_block = "10.0.0.0/16"
-}
 
-resource "aws_vpc" "vpc2" {
-  cidr_block = "10.1.0.0/16"
-}
-
-resource "aws_security_group" "lb_sg_vpc1" {
-  name_prefix = "lb_sg_vpc1"
-  vpc_id      = aws_vpc.vpc1.id
-}
-
-resource "aws_security_group" "lb_sg_vpc2" {
-  name_prefix = "lb_sg_vpc2"
-  vpc_id      = aws_vpc.vpc2.id
-}
-
-resource "aws_lb" "lb_vpc1" {
-  name               = "lb-vpc1"  # Измененное имя без недопустимых символов
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.lb_sg_vpc1.id]
-  subnets            = aws_subnet.public_subnets_vpc1.*.id
-}
-
-resource "aws_lb" "lb_vpc2" {
-  name               = "lb-vpc2"  # Измененное имя без недопустимых символов
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.lb_sg_vpc2.id]
-  subnets            = aws_subnet.public_subnets_vpc2.*.id
-}
-
-resource "aws_subnet" "public_subnets_vpc1" {
-  vpc_id            = aws_vpc.vpc1.id
-  cidr_block        = "10.0.1.0/24"
-  availability_zone = "eu-central-1a"
-}
-
-resource "aws_subnet" "public_subnets_vpc2" {
-  vpc_id            = aws_vpc.vpc2.id
-  cidr_block        = "10.1.1.0/24"
-  availability_zone = "us-east-1a"
-}
-
-resource "aws_instance" "web_instance_vpc1_public" {
-  provider        = aws.useast
-  ami             = "ami-0e00e602389e469a3"
-  instance_type   = "t2.micro"
-  subnet_id       = aws_subnet.public_subnets_vpc1.id
-  vpc_security_group_ids = [aws_security_group.lb_sg_vpc1.id]
-  tags = {
-    Name  = "WebInstanceVPC1"
-    Owner = "Bizon Nik"
-  }
-}
-
-resource "aws_instance" "web_instance_vpc2_public" {
-  provider        = aws.useast
-  ami             = "ami-0f34c5ea932e6f0e4"
-  instance_type   = "t2.micro"
-  subnet_id       = aws_subnet.public_subnets_vpc2.id
-  vpc_security_group_ids = [aws_security_group.lb_sg_vpc2.id]
-  tags = {
-    Name  = "WebInstanceVPC2"
-    Owner = "Bizon Nik"
-  }
-}
+#!/bin/bash
+# Получение приватного IP-адреса текущего экземпляра
+PRIVATE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+sudo yum update -y
+sudo yum install -y httpd
+sudo systemctl enable httpd
+sudo systemctl start httpd
+cat > /var/www/html/index.html <<EOF
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Simple Website - VPC2</title>
+</head>
+<body style="background-color: lightblue;">
+  <h1 style="color: blue;">Hello from VPC2! (VPC2 - Instance $$hostname - Private IP: $$private_ip)</h1>
+  <img src="https://img2.akspic.ru/crops/1/0/0/8/6/168001/168001-more-voda-gidroresursy-oblako-prirodnyj_landshaft-3840x2160.jpg" alt="BMW 525tds">
+</body>
+</html>
+EOF
