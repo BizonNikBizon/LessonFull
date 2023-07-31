@@ -1,14 +1,13 @@
-Error: Unsupported argument
+rror: no matching EC2 Subnet found
 │ 
-│   on test.tf line 24, in data "aws_subnet" "public_subnets_vpc1":
-│   24:   cidr_block_filter = "10.0.0.0/16"
+│   with data.aws_subnet.public_subnets_vpc1,
+│   on test.tf line 21, in data "aws_subnet" "public_subnets_vpc1":
+│   21: data "aws_subnet" "public_subnets_vpc1" {
 │ 
-│ An argument named "cidr_block_filter" is not expected here.
 ╵
 ╷
-│ Error: Unsupported argument
+│ Error: no matching EC2 Subnet found
 │ 
-│   on test.tf line 33, in data "aws_subnet" "public_subnets_vpc2":
-│   33:   cidr_block_filter = "10.0.0.0/16"
-│ 
-│ An argument named "cidr_block_filter" is not expected here.
+│   with data.aws_subnet.public_subnets_vpc2,
+│   on test.tf line 30, in data "aws_subnet" "public_subnets_vpc2":
+│   30: data "aws_subnet" "public_subnets_vpc2" {
