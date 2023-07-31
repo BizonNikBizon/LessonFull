@@ -1,30 +1,80 @@
-Error: Invalid reference
+Error: Unterminated template string
 │ 
-│   on test.tf line 160, in data "template_file" "user_data_vpc1":
-│  160:   <h1 style="color: red;">Привет Дядя Дима! Но Dithih звучит! Это работает! (VPC1 - Instance \${HOSTNAME} - Private IP: \${PRIVATE_IP})</h1>
+│   on test.tf line 215, in data "template_file" "user_data_vpc1":
+│  129: #!/bin/bash
+│  130: # Получение приватного IP-адреса текущего экземпляра
+│  131: PRIVATE_IP=\$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+│  132: sudo yum update -y
+│  133: sudo yum install -y httpd
+│  134: sudo systemctl enable httpd
+│  135: sudo systemctl start httpd
+│  136: cat > /var/www/html/index.html <<EOF
+│  137: <!DOCTYPE html>
+│  138: <html>
+│  139: <head>
+│  140:   <title>My Simple Website - VPC1</title>
+│  141: </head>
+│  142: <body style="background-color: lightblue;">
+│  143:   <h1 style="color: red;">Привет Дядя Дима! Но Dithih звучит! Это работает! (VPC1 - Instance $hostname - Private IP: $private_ip)</h1>
+│  144:   <img src="https://img2.akspic.ru/crops/1/0/0/8/6/168001/168001-more-voda-gidroresursy-oblako-prirodnyj_landshaft-3840x2160.jpg" alt="BMW 525tds">
+│  145: </body>
+│  146: </html>
+│  147: EOF
+│  148:   vars = {
+│  149:     hostname    = "WebInstanceVPC1"
+│  150:     private_ip  = "\${aws_instance.web_instance_vpc1_public.private_ip}"
+│  151:   }
+│  152: }
+│  153: resource "aws_instance" "web_instance_vpc1_public" {
+│  154:   provider                = aws.useast
+│  155:   ami                     = "ami-0e00e602389e469a3"  # Используем ami-0e00e602389e469a3 для региона eu-central-1
+│  156:   instance_type           = "t2.micro"
+│  157:   subnet_id               = aws_subnet.public_subnet_vpc1.id
+│  158:   vpc_security_group_ids  = [aws_security_group.lb_sg_vpc1.id]
+│  159:   user_data               = data.template_file.user_data_vpc1.rendered
+│  160:   tags = {
+│  161:     Name  = "WebInstanceVPC1"
+│  162:     Owner = "Bizon Nik"
+│  163:   }
+│  164: }
+│  165: # Файл user_data.sh для экземпляров в VPC2
+│  166: data "template_file" "user_data_vpc2" {
+│  167:   template = <<-EOT
+│  168: #!/bin/bash
+│  169: # Получение приватного IP-адреса текущего экземпляра
+│  170: PRIVATE_IP=\$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+│  171: sudo yum update -y
+│  172: sudo yum install -y httpd
+│  173: sudo systemctl enable httpd
+│  174: sudo systemctl start httpd
+│  175: cat > /var/www/html/index.html <<EOF
+│  176: <!DOCTYPE html>
+│  177: <html>
+│  178: <head>
+│  179:   <title>My Simple Website - VPC2</title>
+│  180: </head>
+│  181: <body style="background-color: lightblue;">
+│  182:   <h1 style="color: blue;">Hello from VPC2! (VPC2 - Instance $hostname - Private IP: $private_ip)</h1>
+│  183:   <img src="https://img2.akspic.ru/crops/1/0/0/8/6/168001/168001-more-voda-gidroresursy-oblako-prirodnyj_landshaft-3840x2160.jpg" alt="BMW 525tds">
+│  184: </body>
+│  185: </html>
+│  186: EOF
+│  187:   vars = {
+│  188:     hostname    = "WebInstanceVPC2"
+│  189:     private_ip  = "\${aws_instance.web_instance_vpc2_public.private_ip}"
+│  190:   }
+│  191: }
+│  192: resource "aws_instance" "web_instance_vpc2_public" {
+│  193:   provider                = aws.useast
+│  194:   ami                     = "ami-0f34c5ea932e6f0e4"  # Используем ami-0f34c5ea932e6f0e4 для региона us-east-1
+│  195:   instance_type           = "t2.micro"
+│  196:   subnet_id               = aws_subnet.public_subnet_vpc2.id
+│  197:   vpc_security_group_ids  = [aws_security_group.lb_sg_vpc2.id]
+│  198:   user_data               = data.template_file.user_data_vpc2.rendered
+│  199:   tags = {
+│  200:     Name  = "WebInstanceVPC2"
+│  201:     Owner = "Bizon Nik"
+│  202:   }
+│  203: }
 │ 
-│ A reference to a resource type must be followed by at least one attribute access, specifying the resource name.
-╵
-╷
-│ Error: Invalid reference
-│ 
-│   on test.tf line 160, in data "template_file" "user_data_vpc1":
-│  160:   <h1 style="color: red;">Привет Дядя Дима! Но Dithih звучит! Это работает! (VPC1 - Instance \${HOSTNAME} - Private IP: \${PRIVATE_IP})</h1>
-│ 
-│ A reference to a resource type must be followed by at least one attribute access, specifying the resource name.
-╵
-╷
-│ Error: Invalid reference
-│ 
-│   on test.tf line 216, in data "template_file" "user_data_vpc2":
-│  216:   <h1 style="color: blue;">Hello from VPC2! (VPC2 - Instance \${HOSTNAME} - Private IP: \${PRIVATE_IP})</h1>
-│ 
-│ A reference to a resource type must be followed by at least one attribute access, specifying the resource name.
-╵
-╷
-│ Error: Invalid reference
-│ 
-│   on test.tf line 216, in data "template_file" "user_data_vpc2":
-│  216:   <h1 style="color: blue;">Hello from VPC2! (VPC2 - Instance \${HOSTNAME} - Private IP: \${PRIVATE_IP})</h1>
-│ 
-│ A reference to a resource type must be followed by at least one attribute access, specifying the resource name.
+│ No closing marker was found for the string.
