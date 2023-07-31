@@ -1,9 +1,30 @@
-Error: Duplicate provider configuration
+Error: Invalid reference
 │ 
-│   on test.tf line 64:
-│   64: provider "aws" {
+│   on test.tf line 160, in data "template_file" "user_data_vpc1":
+│  160:   <h1 style="color: red;">Привет Дядя Дима! Но Dithih звучит! Это работает! (VPC1 - Instance \${HOSTNAME} - Private IP: \${PRIVATE_IP})</h1>
 │ 
-│ A default (non-aliased) provider configuration for "aws" was already given at test.tf:2,1-15. If multiple configurations are required,
-│ set the "alias" argument for alternative configurations.
+│ A reference to a resource type must be followed by at least one attribute access, specifying the resource name.
 ╵
-
+╷
+│ Error: Invalid reference
+│ 
+│   on test.tf line 160, in data "template_file" "user_data_vpc1":
+│  160:   <h1 style="color: red;">Привет Дядя Дима! Но Dithih звучит! Это работает! (VPC1 - Instance \${HOSTNAME} - Private IP: \${PRIVATE_IP})</h1>
+│ 
+│ A reference to a resource type must be followed by at least one attribute access, specifying the resource name.
+╵
+╷
+│ Error: Invalid reference
+│ 
+│   on test.tf line 216, in data "template_file" "user_data_vpc2":
+│  216:   <h1 style="color: blue;">Hello from VPC2! (VPC2 - Instance \${HOSTNAME} - Private IP: \${PRIVATE_IP})</h1>
+│ 
+│ A reference to a resource type must be followed by at least one attribute access, specifying the resource name.
+╵
+╷
+│ Error: Invalid reference
+│ 
+│   on test.tf line 216, in data "template_file" "user_data_vpc2":
+│  216:   <h1 style="color: blue;">Hello from VPC2! (VPC2 - Instance \${HOSTNAME} - Private IP: \${PRIVATE_IP})</h1>
+│ 
+│ A reference to a resource type must be followed by at least one attribute access, specifying the resource name.
