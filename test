@@ -1,140 +1,81 @@
-# Объявление AWS провайдера
 provider "aws" {
   region = "eu-central-1"
 }
 
-# Создание VPC1
-resource "aws_vpc" "vpc1" {
-  cidr_block = "10.0.0.0/16"
-
-  tags = {
-    Name = "VPC1"
-  }
+data "aws_vpc" "vpc1" {
+  default = true
 }
 
-# Создание VPC2
-resource "aws_vpc" "vpc2" {
-  cidr_block = "10.1.0.0/16"
-
-  tags = {
-    Name = "VPC2"
-  }
+data "aws_vpc" "vpc2" {
+  default = true
 }
 
-# Создание подсетей в VPC1
-resource "aws_subnet" "public_subnets_vpc1" {
-  count             = 2
-  cidr_block        = "10.0.${count.index}.0/24"
-  vpc_id            = aws_vpc.vpc1.id
-  availability_zone = "eu-central-1a"
-
-  tags = {
-    Name = "Public Subnet VPC1 - ${count.index + 1}"
-  }
+data "aws_subnet_ids" "public_subnets_vpc1" {
+  vpc_id = data.aws_vpc.vpc1.id
 }
 
-# Создание подсетей в VPC2
-resource "aws_subnet" "public_subnets_vpc2" {
-  count             = 2
-  cidr_block        = "10.1.${count.index}.0/24"
-  vpc_id            = aws_vpc.vpc2.id
-  availability_zone = "eu-central-1b"
-
-  tags = {
-    Name = "Public Subnet VPC2 - ${count.index + 1}"
-  }
+data "aws_subnet_ids" "public_subnets_vpc2" {
+  vpc_id = data.aws_vpc.vpc2.id
 }
 
-# Создание балансировщиков нагрузки в VPC1
+resource "aws_security_group" "lb_sg_vpc1" {
+  name_prefix = "lb_sg_vpc1"
+  vpc_id      = data.aws_vpc.vpc1.id
+}
+
+resource "aws_security_group" "lb_sg_vpc2" {
+  name_prefix = "lb_sg_vpc2"
+  vpc_id      = data.aws_vpc.vpc2.id
+}
+
 resource "aws_lb" "lb_vpc1" {
-  name               = "lb-vpc1"
+  name               = "lb_vpc1"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.lb_sg_vpc1.id]
-  subnets            = aws_subnet.public_subnets_vpc1.*.id
 
-  tags = {
-    Name = "Load Balancer VPC1"
+  subnet_mapping {
+    subnet_id = data.aws_subnet_ids.public_subnets_vpc1.ids[0]
+  }
+
+  subnet_mapping {
+    subnet_id = data.aws_subnet_ids.public_subnets_vpc1.ids[1]
   }
 }
 
-# Создание балансировщиков нагрузки в VPC2
 resource "aws_lb" "lb_vpc2" {
-  name               = "lb-vpc2"
+  name               = "lb_vpc2"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.lb_sg_vpc2.id]
-  subnets            = aws_subnet.public_subnets_vpc2.*.id
 
-  tags = {
-    Name = "Load Balancer VPC2"
+  subnet_mapping {
+    subnet_id = data.aws_subnet_ids.public_subnets_vpc2.ids[0]
+  }
+
+  subnet_mapping {
+    subnet_id = data.aws_subnet_ids.public_subnets_vpc2.ids[1]
   }
 }
 
-# Создание группы безопасности для VPC1
-resource "aws_security_group" "lb_sg_vpc1" {
-  name_prefix = "lb_sg_vpc1_"
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "Security Group for Load Balancer VPC1"
-  }
-}
-
-# Создание группы безопасности для VPC2
-resource "aws_security_group" "lb_sg_vpc2" {
-  name_prefix = "lb_sg_vpc2_"
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "Security Group for Load Balancer VPC2"
-  }
-}
-
-# Создание EC2 экземпляров в VPC1
 resource "aws_instance" "web_instance_vpc1_public" {
-  ami                     = "ami-0e00e602389e469a3"  # Используем ami-0e00e602389e469a3 для региона eu-central-1
+  ami                     = "ami-0e00e602389e469a3"  # Используйте правильный AMI ID для региона eu-central-1
   instance_type           = "t2.micro"
-  subnet_id               = aws_subnet.public_subnets_vpc1[0].id
+  subnet_id               = data.aws_subnet_ids.public_subnets_vpc1.ids[0]
   vpc_security_group_ids  = [aws_security_group.lb_sg_vpc1.id]
+
   tags = {
     Name  = "WebInstanceVPC1"
     Owner = "Bizon Nik"
   }
 }
 
-# Создание EC2 экземпляров в VPC2
 resource "aws_instance" "web_instance_vpc2_public" {
-  ami                     = "ami-0f34c5ae932e6f0e4"  # Используем ami-0f34c5ae932e6f0e4 для региона us-east-1
+  ami                     = "ami-0f34c5ae932e6f0e4"  # Используйте правильный AMI ID для региона us-east-1
   instance_type           = "t2.micro"
-  subnet_id               = aws_subnet.public_subnets_vpc2[0].id
+  subnet_id               = data.aws_subnet_ids.public_subnets_vpc2.ids[0]
   vpc_security_group_ids  = [aws_security_group.lb_sg_vpc2.id]
+
   tags = {
     Name  = "WebInstanceVPC2"
     Owner = "Bizon Nik"
